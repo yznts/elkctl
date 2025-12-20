@@ -24,7 +24,11 @@
     </head>
     <body>
         <!-- Device list -->
-        <section x-data="devices" class="w-full p-2 flex flex-col gap-2">
+        <section
+            x-data="devices()"
+            x-init="init()"
+            class="w-full p-2 flex flex-col gap-2"
+        >
             <!-- Actual device list -->
             <div>
                 <template x-for="device in state.devices">
@@ -32,7 +36,7 @@
                         <div>
                             <div class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-green-400 rounded"></div>
-                                <span>💡 Left</span>
+                                <span x-text="`💡 ${device.Name}`"></span>
                             </div>
                         </div>
                         <div class="flex gap-1">
@@ -119,7 +123,6 @@
                         />
                         <button
                             type="button"
-                            onclick="onAddDevice()"
                             class="mt-2 btn-sm"
                             @click="addDevice()"
                         >

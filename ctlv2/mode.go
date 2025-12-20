@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	Mode          = ""                // Current mode name.
+	Mode          = "static:rgb"      // Current mode name.
 	ModeCtx       context.Context     // Current mode context.
 	ModeCancel    context.CancelFunc  // Current mode cancel function.
 	ModeWaitGroup = &sync.WaitGroup{} // ModeWG is used to wait for mode goroutines to finish. Use it for graceful shutdowns.

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"time"
@@ -88,6 +89,7 @@ func (e *Elk) scan(timeout time.Duration) (string, error) {
 		} else {
 			scanErr = scanner.Err()
 		}
+		log.Println(line, scanErr)
 		close(done)
 	}()
 	// Wait for response or timeout

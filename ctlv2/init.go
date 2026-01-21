@@ -10,9 +10,7 @@ func init() {
 	// Start state saving goroutine
 	// ...
 
-	// Start mode according to loaded state
-	if Mode != "" {
-		SetMode(Mode)
-	}
-
+	// Start default mode.
+	// Will be replaced with a saved configuration later.
+	SetMode("static:rgb")
 }

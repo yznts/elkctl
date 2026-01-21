@@ -7,6 +7,7 @@ import (
 	"os"
 
 	// Keep for init
+	"github.com/yznts/elkctl/ctlv2"
 	_ "github.com/yznts/elkctl/ctlv2"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -66,6 +67,7 @@ func main() {
 		Services: []application.Service{
 			application.NewService(&GreetService{}),
 			application.NewService(&DeviceService{}),
+			application.NewService(&StatusBarService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
@@ -86,10 +88,32 @@ func main() {
 
 	// Create a system tray menu.
 	systray := app.SystemTray.New()
-	systray.SetLabel("elkctl")
+	systray.SetLabel("💡")
 
 	// Attach window to the system tray menu.
-	systray.AttachWindow(window)
+	if !app.Env.Info().Debug || os.Getenv("ENV") == "prod" {
+		systray.AttachWindow(window)
+	}
+
+	// Add test devices
+	if !app.Env.Info().Debug || os.Getenv("ENV") == "prod" {
+		// None for production
+
+		// Temporary solution
+		ctlv2.AddDevice("Lamp 1", "A7FB96B6-5ED1-5A8D-BAB7-62271EA0B9C7")
+		ctlv2.PowerOnDevice("Lamp 1")
+		ctlv2.EnableDevice("Lamp 1")
+		ctlv2.AddDevice("Lamp 2", "DDDB7C05-8FC0-0F16-3017-1AD8F101FE99")
+		ctlv2.PowerOnDevice("Lamp 2")
+		ctlv2.EnableDevice("Lamp 2")
+	} else {
+		ctlv2.AddDevice("Lamp 1", "A7FB96B6-5ED1-5A8D-BAB7-62271EA0B9C7")
+		ctlv2.PowerOnDevice("Lamp 1")
+		ctlv2.EnableDevice("Lamp 1")
+		ctlv2.AddDevice("Lamp 2", "DDDB7C05-8FC0-0F16-3017-1AD8F101FE99")
+		ctlv2.PowerOnDevice("Lamp 2")
+		ctlv2.EnableDevice("Lamp 2")
+	}
 
 	// Run the application. This blocks until the application has been exited.
 	err := app.Run()

@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	Mode          = "static:rgb"      // Current mode name.
+	Mode          = ""                // Current mode name.
 	ModeCtx       context.Context     // Current mode context.
 	ModeCancel    context.CancelFunc  // Current mode cancel function.
 	ModeWaitGroup = &sync.WaitGroup{} // ModeWG is used to wait for mode goroutines to finish. Use it for graceful shutdowns.
@@ -32,7 +32,7 @@ func SetMode(mode string) {
 	ModeWaitGroup.Add(1)
 	switch Mode {
 	case "static:rgb":
-		StaticRgbMode()
+		go StaticRgbMode()
 	default:
 		panic("unknown mode: " + Mode)
 	}

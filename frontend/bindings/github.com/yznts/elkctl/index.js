@@ -4,9 +4,11 @@
 
 import * as DeviceService from "./deviceservice.js";
 import * as GreetService from "./greetservice.js";
+import * as StatusBarService from "./statusbarservice.js";
 export {
     DeviceService,
-    GreetService
+    GreetService,
+    StatusBarService
 };
 
 export {

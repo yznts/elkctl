@@ -28,6 +28,54 @@ export function GetDevices() {
     }));
 }
 
+/**
+ * @param {string} name
+ * @returns {$CancellablePromise<void>}
+ */
+export function RemoveDevice(name) {
+    return $Call.ByID(3014570653, name);
+}
+
+/**
+ * @param {string} mode
+ * @returns {$CancellablePromise<void>}
+ */
+export function SetMode(mode) {
+    return $Call.ByID(1897138582, mode);
+}
+
+/**
+ * @param {string} brightness
+ * @returns {$CancellablePromise<void>}
+ */
+export function StaticRgbSetBrightness(brightness) {
+    return $Call.ByID(2181176415, brightness);
+}
+
+/**
+ * @param {string} color
+ * @returns {$CancellablePromise<void>}
+ */
+export function StaticRgbSetColor(color) {
+    return $Call.ByID(534234799, color);
+}
+
+/**
+ * @param {string} name
+ * @returns {$CancellablePromise<void>}
+ */
+export function SwitchEnableState(name) {
+    return $Call.ByID(47551641, name);
+}
+
+/**
+ * @param {string} name
+ * @returns {$CancellablePromise<void>}
+ */
+export function SwitchPowerState(name) {
+    return $Call.ByID(1810469873, name);
+}
+
 // Private type creation functions
 const $$createType0 = $models.DeviceObj.createFrom;
 const $$createType1 = $Create.Array($$createType0);

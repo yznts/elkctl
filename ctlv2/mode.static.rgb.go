@@ -12,7 +12,7 @@ var (
 func StaticRgbMode() {
 	// State defaults.
 	if _, ok := StaticRgbState["color"]; !ok {
-		StaticRgbState["color"] = "255,255,255"
+		StaticRgbState["color"] = "15,15,15"
 	}
 	if _, ok := StaticRgbState["brightness"]; !ok {
 		StaticRgbState["brightness"] = "100"
@@ -33,6 +33,10 @@ func StaticRgbMode() {
 		if StaticRgbState["color"] != currentColor {
 			currentColor = StaticRgbState["color"].(string)
 			for _, device := range Devices {
+				// Pass, if device is internally disabled or powered off.
+				if !device.Enabled || !device.Powered {
+					continue
+				}
 				_, err := device.Elk.Exec("set_color:"+currentColor, 5*time.Second)
 				if err != nil {
 					log.Println("Error setting color on device", device.Name, ":", err)
@@ -43,6 +47,10 @@ func StaticRgbMode() {
 		if StaticRgbState["brightness"] != currentBrightness {
 			currentBrightness = StaticRgbState["brightness"].(string)
 			for _, device := range Devices {
+				// Pass, if device is internally disabled or powered off.
+				if !device.Enabled || !device.Powered {
+					continue
+				}
 				_, err := device.Elk.Exec("set_brightness:"+currentBrightness, 5*time.Second)
 				if err != nil {
 					log.Println("Error setting brightness on device", device.Name, ":", err)

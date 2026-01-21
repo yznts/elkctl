@@ -1,8 +1,9 @@
 import { DeviceService } from "./bindings/github.com/yznts/elkctl";
+import { SwitchPowerState } from "./bindings/github.com/yznts/elkctl/deviceservice";
 
-// Devices module
-function devices() {
-  const devices = {
+// Devices list module
+function device() {
+  return {
     state: {
       devices: [],
     },
@@ -14,10 +15,9 @@ function devices() {
     // Init module
     init() {
       // Peroidically refresh devices list
-      setInterval(this.refreshDevices.bind(this), 2000);
+      setInterval(this.refreshDevices.bind(this), 500);
     },
 
-    // Handle device add
     addDevice() {
       // Get form values
       let form = document.querySelector("#add-device-form");
@@ -27,13 +27,24 @@ function devices() {
       DeviceService.AddDevice(name, addr);
     },
 
+    removeDevice(name) {
+      DeviceService.RemoveDevice(name);
+    },
+
+    switchEnableState(name) {
+      DeviceService.SwitchEnableState(name);
+    },
+
+    switchPowerState(name) {
+      DeviceService.SwitchPowerState(name);
+    },
+
     async refreshDevices() {
-      this.state.devices = await DeviceService.GetDevices();
+      const devices = await DeviceService.GetDevices();
+      this.state.devices = devices.sort((a, b) => a.Name.localeCompare(b.Name));
     },
   };
-
-  return devices;
 }
 
 // Export
-window.devices = devices;
+window.device = device;

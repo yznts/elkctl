@@ -22,25 +22,43 @@
             document.documentElement.classList.add("dark");
         </script>
     </head>
-    <body>
+    <body class="font-mono">
         <!-- Device list -->
         <section
-            x-data="devices()"
+            x-data="device()"
             x-init="init()"
             class="w-full p-2 flex flex-col gap-2"
         >
             <!-- Actual device list -->
-            <div>
+            <div class="flex flex-col gap-2">
                 <template x-for="device in state.devices">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="flex items-center gap-1">
-                                <div class="w-2 h-2 bg-green-400 rounded"></div>
-                                <span x-text="`💡 ${device.Name}`"></span>
+                                <div
+                                    x-show="device.Powered && device.Enabled"
+                                    class="w-2 h-2 bg-green-400 rounded"
+                                ></div>
+                                <div
+                                    x-show="device.Powered && !device.Enabled"
+                                    class="w-2 h-2 bg-yellow-400 rounded"
+                                ></div>
+                                <div
+                                    x-show="!device.Powered"
+                                    class="w-2 h-2 bg-red-400 rounded"
+                                ></div>
+                                <span>💡</span>
+                                <span
+                                    x-text="device.Name"
+                                    class="badge-secondary text-xs"
+                                ></span>
                             </div>
                         </div>
                         <div class="flex gap-1">
-                            <button class="btn-sm-icon-outline">
+                            <button
+                                class="btn-sm-icon-outline"
+                                x-on:click="switchEnableState(device.Name)"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
@@ -56,7 +74,10 @@
                                     />
                                 </svg>
                             </button>
-                            <button class="btn-sm-icon-outline">
+                            <button
+                                class="btn-sm-icon-outline"
+                                x-on:click="switchPowerState(device.Name)"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
@@ -68,11 +89,14 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9"
+                                        d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
                                     />
                                 </svg>
                             </button>
-                            <button class="btn-sm-icon-destructive">
+                            <button
+                                class="btn-sm-icon-destructive"
+                                x-on:click="removeDevice(device.Name)"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
@@ -96,26 +120,28 @@
             <details class="group">
                 <summary class="w-full transition-all outline-none rounded-md">
                     <h2
-                        class="flex flex-1 items-start justify-between gap-4 py-4 text-left text-sm font-medium"
+                        class="flex flex-1 items-start justify-between gap-4 py-2 text-left text-sm font-medium"
                     >
                         <div
                             class="w-full flex items-center justify-center gap-1"
                         >
-                            <span class="btn-sm-outline w-full">Add new</span>
+                            <span class="btn-sm-outline text-xs w-full">
+                                + Add new device
+                            </span>
                         </div>
                     </h2>
                 </summary>
                 <section class="card border-[var(--border)] px-4 mb-4">
                     <form id="add-device-form" class="flex flex-col gap-1">
                         <input
-                            class="input"
+                            class="input text-xs"
                             type="text"
                             name="name"
                             placeholder="Device name"
                             x-model="bindings.name"
                         />
                         <input
-                            class="input"
+                            class="input text-xs"
                             type="text"
                             name="addr"
                             placeholder="Device ID/MAC"
@@ -134,21 +160,29 @@
         </section>
         <div class="bg-[var(--border)] w-full h-[1px]"></div>
         <!-- Mode -->
-        <div class="mt-4 px-2">
+        <section x-data="mode()" x-init="init()" class="mt-4 px-2">
             <!-- Mode select -->
-            <select class="select w-full">
-                <optgroup label="Fruits">
-                    <option>Static RGB</option>
-                    <option>Screen tracking</option>
-                </optgroup>
+            <select
+                x-model="bindings.mode"
+                x-on:change="changeMode()"
+                class="select text-xs w-full"
+            >
+                <option value="">---</option>
+                <option value="static:rgb">Static RGB</option>
+                <option value="track:screen">Screen tracking</option>
             </select>
             <!-- Mode configuration -->
             <div class="mt-2">
                 <!-- Static RGB -->
-                <div class="flex items-center gap-2">
+                <div
+                    x-show="bindings.mode == 'static:rgb'"
+                    class="flex items-center gap-2"
+                >
                     <input
                         type="color"
                         value="#333"
+                        x-model="bindings.staticRgbColor"
+                        x-on:input="staticRgbSetColor()"
                         class="w-[36px] h-[36px] border border-[var(--border)] rounded-sm"
                     />
                     <input
@@ -156,33 +190,49 @@
                         min="0"
                         max="100"
                         value="50"
+                        x-model="bindings.staticRgbBrightness"
+                        x-on:input="staticRgbSetBrightness()"
                         class="input w-full"
                     />
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Status bar -->
-        <div
+        <section
+            x-data="statusbar()"
             class="absolute bottom-0 left-0 right-0 h-5 py-3 flex items-center justify-between bg-[var(--card)] border-t border-[var(--border)] text-sm"
         >
             <!-- Left -->
             <div class="px-2 flex items-center gap-2">
-                <!-- Current color -->
-                <div class="w-2 h-2 bg-red-400 rounded"></div>
-                <div class="text-red-400 text-xs">rgb(170,40,2)</div>
-                <!-- Brightness -->
-                <div class="text-xs text-gray-400">/ 50</div>
+                <button x-on:click="quit()" class="btn-sm-icon-ghost w-6 h-6">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-4"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9"
+                        />
+                    </svg>
+                </button>
             </div>
             <!-- Right -->
             <div class="px-2 flex items-center gap-2 text-green-400">
                 <div class="text-xs">24ms</div>
                 <div class="w-2 h-2 bg-green-400 rounded"></div>
             </div>
-        </div>
+        </section>
 
         <!-- Modules -->
-        <script type="module" src="/module.devices.js"></script>
+        <script type="module" src="/module.device.js"></script>
+        <script type="module" src="/module.mode.js"></script>
+        <script type="module" src="/module.statusbar.js"></script>
         <!-- Alpine.js -->
         <script
             defer

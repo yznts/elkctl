@@ -3,6 +3,7 @@ package elkd
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 // Options for elkd wrapper.
 type Options struct {
+	Path           string        // path to elkd binary
 	TimeoutDefault time.Duration // default timeout for operations (will be overridden by specific timeouts)
 }
 
@@ -37,18 +39,18 @@ func (e *Elk) Start() error {
 		e.process = nil
 	}
 	// Start new elkd process
-	cmd := exec.Command("elkd", e.Address)
+	cmd := exec.Command(e.Options.Path, e.Address)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get stdin pipe: %w", err)
 	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get stdout pipe: %w", err)
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get stderr pipe: %w", err)
 	}
 	// Run
 	cmd.Start()
@@ -70,7 +72,8 @@ func (e *Elk) Exec(command string, timeout time.Duration) (string, error) {
 	// Send command
 	_, err := e.stdin.Write([]byte(command + "\n"))
 	if err != nil {
-		return "", err
+		out, _ := io.ReadAll(e.stdout)
+		return "", fmt.Errorf("stdin write error: %w %s", err, string(out))
 	}
 	// Read response
 	return e.scan(timeout)
@@ -96,7 +99,7 @@ func (e *Elk) scan(timeout time.Duration) (string, error) {
 	select {
 	case <-done:
 		if scanErr != nil {
-			return "", scanErr
+			return "", fmt.Errorf("scan error: %w", scanErr)
 		}
 		return line, nil
 	case <-time.After(timeout):
@@ -106,6 +109,11 @@ func (e *Elk) scan(timeout time.Duration) (string, error) {
 
 // New creates a new Elk instance with the given address and options.
 func New(address string, options Options) *Elk {
+	// Default options
+	if options.Path == "" {
+		options.Path = "elkd"
+	}
+	// Create instance
 	return &Elk{
 		Address: address,
 		Options: options,

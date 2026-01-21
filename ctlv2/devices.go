@@ -1,6 +1,9 @@
 package ctlv2
 
 import (
+	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/yznts/elkctl/elkd"
@@ -24,7 +27,21 @@ type Device struct {
 // Add/Remove
 
 func AddDevice(name, addr string) {
-	elk := elkd.New(addr, elkd.Options{})
+	// Determine elkd path.
+	// First, we will check for macOS app bundle.
+	path := "elkd"
+	if runtime.GOOS == "darwin" {
+		exe, err := os.Executable()
+		if err != nil {
+			path = "elkd"
+		} else {
+			exedir := filepath.Dir(exe)
+			path = filepath.Clean(filepath.Join(exedir, "..", "Resources", "elkd"))
+		}
+	}
+	elk := elkd.New(addr, elkd.Options{
+		Path: path,
+	})
 	elk.Start()
 	Devices[name] = &Device{
 		Name:    name,

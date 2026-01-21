@@ -33,6 +33,13 @@ export class DeviceObj {
              */
             this["Enabled"] = false;
         }
+        if (!("Powered" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["Powered"] = false;
+        }
 
         Object.assign(this, $$source);
     }
